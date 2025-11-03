@@ -21,9 +21,6 @@ def parse_invoice(text: str) -> Dict:
         - dentist_name: str
         - date_due: datetime object
         - patient_name: str
-        - total_units: int
-        - unit_price: Optional[Decimal] (single price or None if mixed)
-        - alloys_extras_cost: Decimal
         - total_cost: Decimal
         
     Raises:
@@ -35,34 +32,57 @@ def parse_invoice(text: str) -> Dict:
     # Extract patient name and due date
     patient_name, date_due = _parse_patient_and_date(text)
     
-    # Parse table and extract line items
-    line_items = _parse_table(text)
-    
-    if not line_items:
-        raise ValueError("No line items found in invoice")
-    
-    # Compute totals
-    # Quantity is always 1
-    total_units = 1
-    
-    # Unit price comes from first row only
-    unit_price = line_items[0]['unit_price'] if line_items else Decimal('0')
-    
-    # Alloys/extras is sum of rows 2+ costs (if any)
-    alloys_extras_cost = _compute_alloys_extras(line_items)
-    
-    # Calculate total cost: Unit Price + Alloys/Extras
-    total_cost = unit_price + alloys_extras_cost
+    # Extract total cost directly from TOTAL line
+    total_cost = _parse_total(text)
     
     return {
         'dentist_name': dentist_name,
         'date_due': date_due,
         'patient_name': patient_name,
-        'total_units': total_units,
-        'unit_price': unit_price,
-        'alloys_extras_cost': alloys_extras_cost,
         'total_cost': total_cost,
     }
+
+
+def _parse_total(text: str) -> Decimal:
+    """
+    Parse the total cost from the invoice TOTAL line.
+    
+    Expected patterns:
+    - "TOTAL $ 100.00"
+    - "T O T A L $ 1 0 0 . 0 0" (spaced out text)
+    - "Total: $100.00"
+    
+    Args:
+        text: Invoice text
+        
+    Returns:
+        Total cost as Decimal
+        
+    Raises:
+        ValueError: If TOTAL line not found
+    """
+    # Pattern to match TOTAL with flexible spacing
+    # Handle spaced-out text like "T O T A L $ 1 0 0 . 0 0"
+    # Look for money pattern after TOTAL
+    pattern = r'T\s*O\s*T\s*A\s*L\s*[:\s]*\$\s*([\d\s,\.]+?)(?=\s*\n|\s*Patient|\s*$)'
+    
+    match = re.search(pattern, text, re.IGNORECASE)
+    if not match:
+        # Try simpler pattern without $ sign
+        pattern2 = r'T\s*O\s*T\s*A\s*L\s*[:\s]*([\d\s,\.]+?)(?=\s*\n|\s*Patient|\s*$)'
+        match = re.search(pattern2, text, re.IGNORECASE)
+        if not match:
+            raise ValueError("Could not find TOTAL line in invoice")
+    
+    # Extract the amount string and remove all spaces
+    amount_str = match.group(1).strip()
+    amount_str = amount_str.replace(' ', '').replace(',', '')
+    
+    # Validate it looks like a price (has decimal point)
+    if '.' not in amount_str:
+        raise ValueError(f"TOTAL amount doesn't look like a valid price: {amount_str}")
+    
+    return Decimal(amount_str)
 
 
 def _parse_patient_and_date(text: str) -> Tuple[str, datetime]:

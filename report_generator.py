@@ -138,9 +138,9 @@ def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
     story.append(Spacer(1, 0.1*inch))
     story.append(Paragraph(f"Statement for period ending {last_day_str} for {dentist_name}", title_style))
     
-    # Build table data
+    # Build table data - 3 columns only
     table_data = [
-        ['Date Due', 'Patient Name', 'Total Units', 'Unit Price', 'Alloys/Extras Cost', 'Total Cost']
+        ['Date Due', 'Patient Name', 'Total Cost']
     ]
     
     # Calculate totals
@@ -150,90 +150,70 @@ def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
         # Format date as m/d/yyyy
         date_str = row['date_due'].strftime('%-m/%-d/%Y')
         
-        # Format unit price (blank if None)
-        unit_price_str = f"${row['unit_price']:.2f}" if row['unit_price'] else ''
-        
         table_data.append([
             date_str,
             remove_ligatures(row['patient_name']),
-            str(row['total_units']),
-            unit_price_str,
-            f"${row['alloys_extras_cost']:.2f}",
             f"${row['total_cost']:.2f}",
         ])
     
     # Add total row at the bottom
     table_data.append([
         '',
-        '',
-        '',
-        '',
         'TOTAL:',
         f"${total_cost_sum:.2f}",
     ])
     
-    # Create table
-    table = Table(table_data, colWidths=[1*inch, 2*inch, 1*inch, 1*inch, 1.3*inch, 1*inch])
+    # Create table with professional column widths
+    # Date: 1.5", Patient Name: 4", Total Cost: 1.5"
+    table = Table(table_data, colWidths=[1.5*inch, 4*inch, 1.5*inch])
     
     # Get row count for styling (header + data rows + total row)
     last_row_idx = len(table_data) - 1
     
-    # Style table - clean black theme with no fills
+    # Style table - clean professional black theme
     table.setStyle(TableStyle([
         # Header row - bold text, no background
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('ALIGN', (0, 0), (0, 0), 'CENTER'),  # Date Due centered
+        ('ALIGN', (1, 0), (1, 0), 'LEFT'),    # Patient Name left
+        ('ALIGN', (2, 0), (2, 0), 'RIGHT'),   # Total Cost right
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-        ('TOPPADDING', (0, 0), (-1, 0), 8),
-        ('LINEBELOW', (0, 0), (-1, 0), 1.5, colors.black),
+        ('FONTSIZE', (0, 0), (-1, 0), 11),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('TOPPADDING', (0, 0), (-1, 0), 10),
+        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.black),
         
         # Data rows - clean black text, no backgrounds
         ('TEXTCOLOR', (0, 1), (-1, last_row_idx - 1), colors.black),
         ('ALIGN', (0, 1), (0, last_row_idx - 1), 'CENTER'),  # Date Due centered
-        ('ALIGN', (2, 1), (-1, last_row_idx - 1), 'RIGHT'),  # Numbers right-aligned
+        ('ALIGN', (1, 1), (1, last_row_idx - 1), 'LEFT'),    # Patient Name left
+        ('ALIGN', (2, 1), (2, last_row_idx - 1), 'RIGHT'),   # Total Cost right
         ('FONTNAME', (0, 1), (-1, last_row_idx - 1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, last_row_idx - 1), 9),
-        ('TOPPADDING', (0, 1), (-1, last_row_idx - 1), 7),
-        ('BOTTOMPADDING', (0, 1), (-1, last_row_idx - 1), 7),
+        ('FONTSIZE', (0, 1), (-1, last_row_idx - 1), 10),
+        ('TOPPADDING', (0, 1), (-1, last_row_idx - 1), 8),
+        ('BOTTOMPADDING', (0, 1), (-1, last_row_idx - 1), 8),
         
         # Total row - bold, clean
         ('FONTNAME', (0, last_row_idx), (-1, last_row_idx), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, last_row_idx), (-1, last_row_idx), 10),
-        ('ALIGN', (4, last_row_idx), (-1, last_row_idx), 'RIGHT'),
-        ('TOPPADDING', (0, last_row_idx), (-1, last_row_idx), 10),
-        ('BOTTOMPADDING', (0, last_row_idx), (-1, last_row_idx), 8),
-        ('LINEABOVE', (0, last_row_idx), (-1, last_row_idx), 1.5, colors.black),
+        ('FONTSIZE', (0, last_row_idx), (-1, last_row_idx), 11),
+        ('ALIGN', (1, last_row_idx), (1, last_row_idx), 'RIGHT'),  # "TOTAL:" right-aligned
+        ('ALIGN', (2, last_row_idx), (2, last_row_idx), 'RIGHT'),  # Total amount right-aligned
+        ('TOPPADDING', (0, last_row_idx), (-1, last_row_idx), 12),
+        ('BOTTOMPADDING', (0, last_row_idx), (-1, last_row_idx), 10),
+        ('LINEABOVE', (0, last_row_idx), (-1, last_row_idx), 2, colors.black),
         
-        # Outer border only - clean lines
-        ('BOX', (0, 0), (-1, -1), 1, colors.black),
+        # Outer border - clean professional lines
+        ('BOX', (0, 0), (-1, -1), 1.5, colors.black),
         
         # Vertical lines between columns
         ('LINEAFTER', (0, 0), (0, -1), 0.5, colors.black),
         ('LINEAFTER', (1, 0), (1, -1), 0.5, colors.black),
-        ('LINEAFTER', (2, 0), (2, -1), 0.5, colors.black),
-        ('LINEAFTER', (3, 0), (3, -1), 0.5, colors.black),
-        ('LINEAFTER', (4, 0), (4, -1), 0.5, colors.black),
     ]))
     
     story.append(table)
-    story.append(Spacer(1, 0.3*inch))
-    
-    # Footer with summary statistics - clean and minimal
-    total_patients = len(sorted_rows)
-    total_units = sum(row['total_units'] for row in sorted_rows)
-    
-    footer_style = ParagraphStyle(
-        'Footer',
-        parent=styles['Normal'],
-        fontSize=9,
-        textColor=colors.black,
-        spaceAfter=3,
-    )
     
     # Thank you message
-    story.append(Spacer(1, 0.3*inch))
+    story.append(Spacer(1, 0.4*inch))
     
     thank_you_style = ParagraphStyle(
         'ThankYou',

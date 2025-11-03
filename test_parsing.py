@@ -37,10 +37,7 @@ def test_invoice(file_path):
         print("   Results:")
         print(f"   - Dentist Name: {data['dentist_name']}")
         print(f"   - Patient Name: {data['patient_name']}")
-        print(f"   - Date Due: {data['date_due'].strftime('%-m/%-d/%Y')}")
-        print(f"   - Total Units: {data['total_units']}")
-        print(f"   - Unit Price: ${data['unit_price']:.2f}" if data['unit_price'] else "   - Unit Price: (mixed)")
-        print(f"   - Alloys/Extras: ${data['alloys_extras_cost']:.2f}")
+        print(f"   - Date Due: {data['date_due'].strftime('%m/%d/%Y')}")
         print(f"   - Total Cost: ${data['total_cost']:.2f}")
         
         success = True
