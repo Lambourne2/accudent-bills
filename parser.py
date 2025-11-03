@@ -197,6 +197,7 @@ def _parse_table_row(line: str) -> Optional[Dict]:
     
     Expected format: Description text | Quantity | Unit Price | Cost
     Numbers may have $ and commas.
+    Negative amounts shown in parentheses: ($110.00) or (110.00)
     
     Args:
         line: Single line from table
@@ -204,45 +205,79 @@ def _parse_table_row(line: str) -> Optional[Dict]:
     Returns:
         Dict with description, quantity, unit_price, cost or None if not parseable
     """
-    # Try to find numbers in the line
-    # Pattern: look for quantity (integer), unit price ($x.xx), cost ($x.xx)
+    # Split by common separators but keep the line structure
+    # Expected: Description | Quantity | Unit Price | Cost
     
-    # Extract all money amounts from the line
-    money_pattern = r'\$?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)'
-    numbers = re.findall(money_pattern, line)
+    # Look for the rightmost number in parentheses (negative cost)
+    negative_cost_pattern = r'\(\$?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)\)\s*$'
+    negative_match = re.search(negative_cost_pattern, line)
     
-    if len(numbers) < 3:
-        # Not enough numbers for quantity, unit_price, cost
-        return None
+    if negative_match:
+        # This is a rebate line with negative cost
+        cost_str = negative_match.group(1).replace(',', '')
+        cost = -Decimal(cost_str)  # Negative!
+        
+        # Remove the cost from line to parse the rest
+        line_without_cost = line[:negative_match.start()].strip()
+        
+        # Now find the last two numbers (quantity and unit_price)
+        remaining_pattern = r'\$?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)'
+        remaining_numbers = re.findall(remaining_pattern, line_without_cost)
+        
+        if len(remaining_numbers) < 2:
+            return None
+        
+        try:
+            # Last two numbers are quantity and unit_price
+            quantity = int(float(remaining_numbers[-2].replace(',', '')))
+            unit_price = Decimal(remaining_numbers[-1].replace(',', ''))
+            
+            # Find description (everything before quantity)
+            desc_match = re.search(r'(.+?)\s+' + re.escape(remaining_numbers[-2]), line_without_cost)
+            description = desc_match.group(1).strip() if desc_match else ''
+            description = re.sub(r'^[\|\t\s]+', '', description)
+            
+            return {
+                'description': description,
+                'quantity': quantity,
+                'unit_price': unit_price,
+                'cost': cost,
+            }
+        except (ValueError, IndexError, AttributeError):
+            return None
     
-    try:
-        # Typically: description ... quantity unit_price cost
-        # Take last 3 numbers as quantity, unit_price, cost
-        quantity_str = numbers[-3].replace(',', '')
-        unit_price_str = numbers[-2].replace(',', '')
-        cost_str = numbers[-1].replace(',', '')
+    else:
+        # Normal positive amounts - use original logic
+        money_pattern = r'\$?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)'
+        numbers = re.findall(money_pattern, line)
         
-        quantity = int(float(quantity_str))
-        unit_price = Decimal(unit_price_str)
-        cost = Decimal(cost_str)
+        if len(numbers) < 3:
+            return None
         
-        # Extract description (everything before the numbers)
-        # Find position of first number
-        first_num_pos = line.find(numbers[-3])
-        description = line[:first_num_pos].strip()
+        try:
+            # Last 3 numbers are quantity, unit_price, cost
+            quantity_str = numbers[-3].replace(',', '')
+            unit_price_str = numbers[-2].replace(',', '')
+            cost_str = numbers[-1].replace(',', '')
+            
+            quantity = int(float(quantity_str))
+            unit_price = Decimal(unit_price_str)
+            cost = Decimal(cost_str)
+            
+            # Extract description (everything before the numbers)
+            first_num_pos = line.find(numbers[-3])
+            description = line[:first_num_pos].strip()
+            description = re.sub(r'^[\|\t\s]+', '', description)
+            
+            return {
+                'description': description,
+                'quantity': quantity,
+                'unit_price': unit_price,
+                'cost': cost,
+            }
         
-        # Remove leading separators like | or tabs
-        description = re.sub(r'^[\|\t\s]+', '', description)
-        
-        return {
-            'description': description,
-            'quantity': quantity,
-            'unit_price': unit_price,
-            'cost': cost,
-        }
-    
-    except (ValueError, IndexError):
-        return None
+        except (ValueError, IndexError):
+            return None
 
 
 def _compute_unit_price(line_items: List[Dict]) -> Optional[Decimal]:
