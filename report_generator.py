@@ -60,7 +60,7 @@ def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
     # Sort rows by date
     sorted_rows = sorted(rows, key=lambda r: r['date_due'])
     
-    # Create PDF
+    # Create PDF with tighter margins for more content per page
     doc = SimpleDocTemplate(
         str(pdf_path),
         pagesize=letter,
@@ -129,14 +129,15 @@ def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
         fontSize=11,
         fontName='Helvetica-Bold',
         textColor=colors.black,
-        spaceAfter=0.25*inch,
+        spaceAfter=0,  # Space handled by explicit Spacer
     )
     
-    # Build header
+    # Build header (compact spacing)
     story.append(Paragraph("Accudent Dental Lab", company_style))
     story.append(Paragraph("5283 West 8180 South, West Jordan, Utah · Phone 801-231-6161", address_style))
-    story.append(Spacer(1, 0.1*inch))
+    story.append(Spacer(1, 0.05*inch))  # Reduced from 0.1"
     story.append(Paragraph(f"Statement for period ending {last_day_str} for {dentist_name}", title_style))
+    story.append(Spacer(1, 0.15*inch))  # Small space before table
     
     # Build table data - 3 columns only
     table_data = [
@@ -170,7 +171,7 @@ def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
     # Get row count for styling (header + data rows + total row)
     last_row_idx = len(table_data) - 1
     
-    # Style table - clean professional black theme
+    # Style table - compact professional layout for more rows per page
     table.setStyle(TableStyle([
         # Header row - bold text, no background
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
@@ -178,29 +179,29 @@ def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
         ('ALIGN', (1, 0), (1, 0), 'LEFT'),    # Patient Name left
         ('ALIGN', (2, 0), (2, 0), 'RIGHT'),   # Total Cost right
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 11),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('TOPPADDING', (0, 0), (-1, 0), 10),
-        ('LINEBELOW', (0, 0), (-1, 0), 2, colors.black),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),    # Reduced from 11
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 6), # Reduced from 12
+        ('TOPPADDING', (0, 0), (-1, 0), 6),    # Reduced from 10
+        ('LINEBELOW', (0, 0), (-1, 0), 1.5, colors.black),
         
-        # Data rows - clean black text, no backgrounds
+        # Data rows - compact spacing for more rows
         ('TEXTCOLOR', (0, 1), (-1, last_row_idx - 1), colors.black),
         ('ALIGN', (0, 1), (0, last_row_idx - 1), 'CENTER'),  # Date Due centered
         ('ALIGN', (1, 1), (1, last_row_idx - 1), 'LEFT'),    # Patient Name left
         ('ALIGN', (2, 1), (2, last_row_idx - 1), 'RIGHT'),   # Total Cost right
         ('FONTNAME', (0, 1), (-1, last_row_idx - 1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, last_row_idx - 1), 10),
-        ('TOPPADDING', (0, 1), (-1, last_row_idx - 1), 8),
-        ('BOTTOMPADDING', (0, 1), (-1, last_row_idx - 1), 8),
+        ('FONTSIZE', (0, 1), (-1, last_row_idx - 1), 9),     # Reduced from 10
+        ('TOPPADDING', (0, 1), (-1, last_row_idx - 1), 4),   # Reduced from 8
+        ('BOTTOMPADDING', (0, 1), (-1, last_row_idx - 1), 4), # Reduced from 8
         
         # Total row - bold, clean
         ('FONTNAME', (0, last_row_idx), (-1, last_row_idx), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, last_row_idx), (-1, last_row_idx), 11),
+        ('FONTSIZE', (0, last_row_idx), (-1, last_row_idx), 10), # Reduced from 11
         ('ALIGN', (1, last_row_idx), (1, last_row_idx), 'RIGHT'),  # "TOTAL:" right-aligned
         ('ALIGN', (2, last_row_idx), (2, last_row_idx), 'RIGHT'),  # Total amount right-aligned
-        ('TOPPADDING', (0, last_row_idx), (-1, last_row_idx), 12),
-        ('BOTTOMPADDING', (0, last_row_idx), (-1, last_row_idx), 10),
-        ('LINEABOVE', (0, last_row_idx), (-1, last_row_idx), 2, colors.black),
+        ('TOPPADDING', (0, last_row_idx), (-1, last_row_idx), 8),  # Reduced from 12
+        ('BOTTOMPADDING', (0, last_row_idx), (-1, last_row_idx), 6), # Reduced from 10
+        ('LINEABOVE', (0, last_row_idx), (-1, last_row_idx), 1.5, colors.black),
         
         # Outer border - clean professional lines
         ('BOX', (0, 0), (-1, -1), 1.5, colors.black),
@@ -212,8 +213,8 @@ def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
     
     story.append(table)
     
-    # Thank you message
-    story.append(Spacer(1, 0.4*inch))
+    # Thank you message (compact spacing)
+    story.append(Spacer(1, 0.25*inch))  # Reduced from 0.4"
     
     thank_you_style = ParagraphStyle(
         'ThankYou',
