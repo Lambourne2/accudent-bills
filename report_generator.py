@@ -4,6 +4,7 @@ Creates print-ready monthly reports with tables and totals.
 """
 
 import subprocess
+import unicodedata
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
@@ -15,6 +16,32 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+
+
+def remove_ligatures(text: str) -> str:
+    """
+    Remove ligature characters that may not render properly in PDFs.
+    Converts ligatures like ﬀ, ﬁ, ﬂ to their component letters.
+    """
+    # Map ligatures to their component characters
+    ligature_map = {
+        '\ufb00': 'ff',  # ﬀ
+        '\ufb01': 'fi',  # ﬁ
+        '\ufb02': 'fl',  # ﬂ
+        '\ufb03': 'ffi', # ﬃ
+        '\ufb04': 'ffl', # ﬄ
+        '\ufb05': 'ft',  # ﬅ (long s + t)
+        '\ufb06': 'st',  # ﬆ
+    }
+    
+    # Replace ligatures
+    for ligature, replacement in ligature_map.items():
+        text = text.replace(ligature, replacement)
+    
+    # Also normalize to NFD and remove combining characters that might cause issues
+    text = unicodedata.normalize('NFC', text)
+    
+    return text
 
 
 def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
@@ -49,6 +76,7 @@ def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
     
     # Extract dentist name from first row (all invoices should be from same dentist)
     dentist_name = sorted_rows[0]['dentist_name'] if sorted_rows else 'Unknown Dentist'
+    dentist_name = remove_ligatures(dentist_name)  # Fix ligature rendering issues
     
     # Extract month/year from folder name (YYYY-MM) and get last day of month
     year_month = month_folder.name
@@ -127,7 +155,7 @@ def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
         
         table_data.append([
             date_str,
-            row['patient_name'],
+            remove_ligatures(row['patient_name']),
             str(row['total_units']),
             unit_price_str,
             f"${row['alloys_extras_cost']:.2f}",
@@ -204,11 +232,8 @@ def build_report_pdf(month_folder: Path, rows: List[Dict]) -> Path:
         spaceAfter=3,
     )
     
-    story.append(Paragraph(f"<b>Total Patients:</b> {total_patients}", footer_style))
-    story.append(Paragraph(f"<b>Total Units:</b> {total_units}", footer_style))
-    
     # Thank you message
-    story.append(Spacer(1, 0.25*inch))
+    story.append(Spacer(1, 0.3*inch))
     
     thank_you_style = ParagraphStyle(
         'ThankYou',
