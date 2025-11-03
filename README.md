@@ -4,15 +4,34 @@ A macOS drag-and-drop application for processing dental lab invoices (.pages and
 
 ## 🚀 Quick Start (For Non-Technical Users)
 
-**Already installed?** Just double-click **"Accudent Importer"** on your Desktop!
+### Already Installed?
+Just **right-click** **"Accudent Importer"** on your Desktop → **Open**
 
-**First time?** Run these two commands in Terminal:
+### First Time Setup?
+
+**1. Download this repository**
 ```bash
-cd ~/Code/accudent-bills
-./install.sh
+# Click the green "Code" button above → Download ZIP
+# Unzip it anywhere on your Mac (Desktop, Documents, etc.)
 ```
 
-Then double-click the new desktop icon. See [QUICK_START.md](QUICK_START.md) for detailed instructions.
+**2. Open Terminal** (search "Terminal" in Spotlight)
+
+**3. Run the setup script**
+```bash
+# Navigate to wherever you unzipped the folder
+cd ~/Downloads/accudent-bills-main    # (or wherever you put it)
+
+# Run setup (this installs everything)
+./FIRST_TIME_SETUP.sh
+```
+
+**4. Launch the app**
+- Find "Accudent Importer" on your Desktop
+- **Right-click** → **Open** (first time only)
+- After that, just double-click!
+
+📖 See [INSTRUCTIONS_FOR_USER.md](INSTRUCTIONS_FOR_USER.md) for detailed usage guide.
 
 ---
 
@@ -26,47 +45,18 @@ Then double-click the new desktop icon. See [QUICK_START.md](QUICK_START.md) for
 - **Print-Ready Reports**: Professional PDF reports with company header and dentist name
 - **Auto-Cleanup**: Intermediate PDF files from .pages conversion are automatically deleted
 
-## Installation
+## Installation (Automated)
 
-### Prerequisites
+The `FIRST_TIME_SETUP.sh` script automatically installs:
+- ✅ Homebrew (if not installed)
+- ✅ Python 3.12 with tkinter
+- ✅ Virtual environment
+- ✅ All dependencies
+- ✅ Desktop launcher
 
-macOS with Homebrew installed. Install Python 3.12 with tkinter support:
+**No manual installation required!** Just run the setup script once.
 
-```bash
-brew install python@3.12 python-tk@3.12
-```
-
-### Setup
-
-```bash
-# Create virtual environment with Python 3.12
-/opt/homebrew/bin/python3.12 -m venv venv
-
-# Install dependencies
-./venv/bin/pip install -r requirements.txt
-
-# Run the app
-./run.sh
-```
-
-Or if you prefer activating the venv:
-```bash
-source venv/bin/activate
-pip install -r requirements.txt
-python accudent_app.py
-```
-
-## Building macOS App
-
-```bash
-# Make the build script executable
-chmod +x make_app.sh
-
-# Build the .app bundle
-./make_app.sh
-```
-
-The app will be created in the `dist/` folder.
+For developers or manual installation, see [DEVELOPERS.md](DEVELOPERS.md).
 
 ## Output Format
 
