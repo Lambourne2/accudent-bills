@@ -1,0 +1,56 @@
+╔════════════════════════════════════════════════════════════╗
+║                                                            ║
+║           🦷  ACCUDENT IMPORTER - START HERE  🦷           ║
+║                                                            ║
+╚════════════════════════════════════════════════════════════╝
+
+
+FOR FIRST-TIME SETUP:
+───────────────────────────────────────────────────────────────
+
+1. Open Terminal (search "Terminal" in Spotlight)
+
+2. Copy and paste these two lines:
+   
+   cd ~/Code/accudent-bills
+   ./install.sh
+
+3. Press Enter after each line
+
+4. You'll see "✅ Installation complete!"
+
+5. Look for "Accudent Importer" icon on your Desktop
+
+
+TO USE THE APP:
+───────────────────────────────────────────────────────────────
+
+1. Double-click "Accudent Importer" on Desktop
+
+2. Drag your .pages invoice files into the window
+
+3. Confirm the dentist name when asked
+
+4. Done! Files saved to Documents/AccudentLab/
+
+
+YOUR FILES:
+───────────────────────────────────────────────────────────────
+
+After processing, find your files in:
+Documents → AccudentLab → [Month Folder]
+
+• Excel spreadsheet (for data entry)
+• PDF statement (ready to print/send)
+
+
+NEED HELP?
+───────────────────────────────────────────────────────────────
+
+📖 Read: QUICK_START.md (detailed guide)
+📖 Read: INSTRUCTIONS_FOR_USER.md (simple guide)
+
+📞 Call: 801-231-6161
+
+
+═══════════════════════════════════════════════════════════════

@@ -1,0 +1,37 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# macOS
+.DS_Store
+*.app
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Output files (keep these out of repo, but users will generate them)
+*.pdf
+!icon.pdf
+*.xlsx
+!ExampleSheet.xlsx
+*.csv
+
+# Temp files
+*.tmp
+*.bak
