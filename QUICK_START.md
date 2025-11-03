@@ -11,10 +11,13 @@
    ```
 3. You'll see "✅ Installation complete!"
 
-### Step 2: Launch the App
+### Step 2: Launch the App (First Time)
 1. Look on your **Desktop** for **"Accudent Importer"**
-2. **Double-click** the icon to launch
-3. A window will open ready to process invoices!
+2. **Right-click** the icon → Select **"Open"**
+3. Click **"Open"** again when macOS asks for confirmation
+4. A window will open ready to process invoices!
+
+**Note:** After the first time, you can just double-click normally. This security step only happens once.
 
 ---
 

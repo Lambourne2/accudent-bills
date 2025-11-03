@@ -3,7 +3,8 @@
 ## 📱 Simple 3-Step Process
 
 ### 1️⃣ Open the App
-Double-click **"Accudent Importer"** on your Desktop
+**First time:** Right-click **"Accudent Importer"** → Select "Open" → Confirm  
+**After that:** Just double-click the icon
 
 ### 2️⃣ Drop Your Files
 Drag your invoice files (`.pages` files) into the window
@@ -63,8 +64,9 @@ Call **801-231-6161**
 3. Type: `./install.sh`
 4. The icon will reappear on your Desktop
 
-**App won't open?**
-Right-click the icon → Open → Click "Open" again to confirm
+**App won't open? (Bounces and closes immediately)**  
+→ Right-click the icon → Select "Open" → Click "Open" again to confirm  
+→ This is a macOS security feature - only needed the first time!
 
 **Files in wrong month?**
 The app uses the due date on each invoice to organize by month

@@ -27,18 +27,23 @@ mkdir -p "$APP_PATH/Contents/MacOS"
 mkdir -p "$APP_PATH/Contents/Resources"
 
 # Create launcher script
-cat > "$APP_PATH/Contents/MacOS/Accudent" << 'EOF'
+cat > "$APP_PATH/Contents/MacOS/Accudent" << EOF
 #!/bin/bash
-# Navigate to app directory
-cd "$(dirname "$0")/../../.."
-APP_DIR="$(pwd)"
+# Launch Accudent Importer
+# Navigate to the source code directory
+CODE_DIR="$SCRIPT_DIR"
 
-# Find the actual code directory (go up from .app bundle)
-CODE_DIR="$HOME/Code/accudent-bills"
+cd "\$CODE_DIR"
 
-# Launch the app
-cd "$CODE_DIR"
-./run.sh
+# Activate virtual environment and run
+if [ -f "./venv/bin/python3.12" ]; then
+    ./venv/bin/python3.12 accudent_app.py 2>&1 | tee logs/app.log
+elif [ -f "./venv/bin/python3" ]; then
+    ./venv/bin/python3 accudent_app.py 2>&1 | tee logs/app.log
+else
+    echo "Error: Virtual environment not found. Please run setup first."
+    exit 1
+fi
 EOF
 
 chmod +x "$APP_PATH/Contents/MacOS/Accudent"
